@@ -1,25 +1,14 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
-class FilesystemElement
+class FilesystemTools
 {
 private:
-    std::string path;
-    bool is_dir;
+    static void print_directory_recursive(std::filesystem::directory_entry directory, int printing_layer);
+    static void count_and_print_files_recursive(std::filesystem::directory_entry directory, int *prev_dirs = nullptr, int *prev_files = nullptr);
 
 public:
-    FilesystemElement(std::string path, bool is_directory) : path(path), is_dir(is_directory) {}
-
-    std::string get_path() const { return path; }
-    std::string get_name() const
-    {
-        int pos = path.find_last_of('/') + 1;
-        return path.substr(pos, path.length() - 1);
-    }
-    std::vector<FilesystemElement> elements;
-    bool is_directory() const { return is_dir; };
+    static void print_directory(std::string dir_path);
+    static void count_and_print_files(std::string dir_path);
 };
-
-FilesystemElement list_directory(std::string dir_path);
