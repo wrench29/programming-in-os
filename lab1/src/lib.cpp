@@ -1,8 +1,9 @@
 #include <iostream>
+#include <vector>
 
 #include "lib.hpp"
 
-void hello()
+DirectoryListing list_directory(std::string dir_path)
 {
-    std::cout << "Hello World" << std::endl;
+    return DirectoryListing(dir_path);
 }

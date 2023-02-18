@@ -2,7 +2,7 @@
 
 int main()
 {
-    hello();
+    auto listing = list_directory("/home/wrnch/Downloads");
 
     return 0;
 }
