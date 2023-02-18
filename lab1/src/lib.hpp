@@ -3,21 +3,23 @@
 #include <string>
 #include <vector>
 
-class BasicFilesystemElement
+class FilesystemElement
 {
 private:
-    std::string name;
+    std::string path;
+    bool is_dir;
 
 public:
-    BasicFilesystemElement(std::string name) : name(name) {}
-    std::string get_name() const { return name; }
+    FilesystemElement(std::string path, bool is_directory) : path(path), is_dir(is_directory) {}
+
+    std::string get_path() const { return path; }
+    std::string get_name() const
+    {
+        int pos = path.find_last_of('/') + 1;
+        return path.substr(pos, path.length() - 1);
+    }
+    std::vector<FilesystemElement> elements;
+    bool is_directory() const { return is_dir; };
 };
 
-class DirectoryListing : BasicFilesystemElement
-{
-public:
-    DirectoryListing(std::string name) : BasicFilesystemElement(name) {}
-    std::vector<std::string> elements;
-};
-
-DirectoryListing list_directory(std::string dir_path);
+FilesystemElement list_directory(std::string dir_path);
