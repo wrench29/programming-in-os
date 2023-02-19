@@ -20,8 +20,10 @@ fn print_directory_content(dir_path: &str, layer: Option<i32>) {
         for _ in 0..current_layer {
             print!("| ");
         }
-        println!("{}", filename);
-        if md.is_dir() {
+        if md.is_file() {
+            println!("{}", filename);
+        } else if md.is_dir() {
+            println!("{}/", filename);
             print_directory_content(&path_string, Some(current_layer + 1));
         }
     }
