@@ -18,16 +18,7 @@ public class Main {
     }
 
     public static Future<Long> calculateAsync(long index) {
-        CompletableFuture<Long> completableFuture = new CompletableFuture<>();
-
-        ExecutorService pool = Executors.newCachedThreadPool();
-        pool.submit(() -> {
-            completableFuture.complete(fib(index));
-            return null;
-        });
-        pool.shutdown();
-
-        return completableFuture;
+        return CompletableFuture.supplyAsync(() -> fib(index));
     }
 
     public static Long fib(Long n)
