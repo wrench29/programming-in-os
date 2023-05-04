@@ -4,9 +4,9 @@ use anyhow::Result;
 
 use crate::queue;
 
-pub struct ConsoleApp {}
+pub struct Worker {}
 
-impl ConsoleApp {
+impl Worker {
     pub fn new() -> Self {
         Self {}
     }
@@ -17,7 +17,7 @@ impl ConsoleApp {
 
         queue.declare_queue("test_queue").await?;
 
-        queue.send("test_queue", "test message".into()).await?;
+        queue.set_recv_callback("test_queue", my_callback).await?;
 
         tokio::time::sleep(Duration::from_secs(1)).await;
 

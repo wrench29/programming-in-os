@@ -1,28 +1,30 @@
-use std::time::Duration;
-
 use anyhow::Result;
+use clap::Parser;
 
 mod app;
 mod queue;
+mod worker;
+
+/// Simple application to create thumbnails using multiprocess
+#[derive(Parser)]
+#[command(about)]
+struct Cli {
+    /// Run app in the worker mode
+    #[arg(short, long, default_value_t = false)]
+    worker: bool,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let connection_config = queue::RabbitQueueConnnectionConfig::default();
-    let queue = queue::RabbitQueue::new(&connection_config).await?;
+    let args = Cli::parse();
 
-    queue.declare_queue("test_queue").await?;
-    // queue.send("test_queue", "test1".into()).await?;
-    // queue.send("test_queue", "test2".into()).await?;
-    // queue.send("test_queue", "test3".into()).await?;
-    queue.set_recv_callback("test_queue", my_callback).await?;
-
-    tokio::time::sleep(Duration::from_secs(1)).await;
-
-    queue.close().await?;
+    if args.worker {
+        let worker = worker::Worker::new();
+        worker.run().await?;
+    } else {
+        let app = app::ConsoleApp::new();
+        app.run().await?;
+    }
 
     Ok(())
-}
-
-fn my_callback(data: Vec<u8>) {
-    println!("{}", String::from_utf8(data).unwrap());
 }
