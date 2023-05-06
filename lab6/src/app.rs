@@ -35,7 +35,9 @@ impl ConsoleApp {
         queue
             .set_recv_callback(TN_QUEUE_RESULTS, move |data| {
                 let data_str = String::from_utf8(data).unwrap();
-                println!("{}", data_str);
+                let data = json::parse(&data_str).unwrap();
+                let data_path = data["path"].as_str().unwrap();
+                println!("Done, thumbnail path: {}", data_path);
                 sender.send(()).unwrap();
             })
             .await?;
