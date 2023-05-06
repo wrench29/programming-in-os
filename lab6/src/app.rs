@@ -17,7 +17,59 @@ impl ConsoleApp {
         Self {}
     }
 
-    pub async fn run(self, is_automated: bool) -> Result<()> {
+    pub async fn run_automode(self) -> Result<()> {
+        let connection_config = queue::RabbitQueueConnnectionConfig::default();
+        let queue = queue::RabbitQueue::new(&connection_config).await?;
+
+        queue.declare_queue(TN_QUEUE_TASKS).await?;
+        queue.declare_queue(TN_QUEUE_RESULTS).await?;
+
+        let (sender, receiver) = bounded::<()>(100);
+
+        queue
+            .set_recv_callback(TN_QUEUE_RESULTS, move |data| {
+                let data_str = String::from_utf8(data).unwrap();
+                let data = json::parse(&data_str).unwrap();
+                let data_path = data["path"].as_str().unwrap();
+                println!("Done, thumbnail path: {}", data_path);
+                sender.send(()).unwrap();
+            })
+            .await?;
+
+        let mut images_paths = Vec::<String>::new();
+        for i in 1..11 {
+            images_paths.push(format!("./example_images/test_image_{}.jpg", i));
+        }
+        let pref_width = 64;
+
+        for image_path in images_paths {
+            let send_data = object! {
+                image_path: image_path.clone(),
+                pref_width: pref_width,
+            };
+            let send_data_str = send_data.dump();
+            queue.send(TN_QUEUE_TASKS, send_data_str.into()).await?;
+
+            println!("Sent image `{}` to a worker.", image_path);
+
+            loop {
+                select! {
+                    recv(receiver) -> _ => {
+                        break;
+                    }
+                    default => {
+                        sleep(Duration::from_millis(100)).await;
+                    }
+                }
+            }
+        }
+
+        queue.close().await?;
+
+        Ok(())
+    }
+
+    pub async fn run(self) -> Result<()> {
         let connection_config = queue::RabbitQueueConnnectionConfig::default();
         let queue = queue::RabbitQueue::new(&connection_config).await?;
 

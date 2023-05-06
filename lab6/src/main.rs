@@ -26,7 +26,11 @@ async fn main() -> Result<()> {
         worker.run().await?;
     } else {
         let app = app::ConsoleApp::new();
-        app.run(args.auto_app).await?;
+        if args.auto_app {
+            app.run_automode().await?;
+        } else {
+            app.run().await?;
+        }
     }
 
     Ok(())
