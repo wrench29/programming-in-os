@@ -10,8 +10,11 @@ mod worker;
 #[command(about)]
 struct Cli {
     /// Run app in the worker mode
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = false, group = "mode")]
     worker: bool,
+    /// Run app in the automatic application mode (for testing)
+    #[arg(short, long, default_value_t = false, group = "mode")]
+    auto_app: bool,
 }
 
 #[tokio::main]
@@ -23,7 +26,7 @@ async fn main() -> Result<()> {
         worker.run().await?;
     } else {
         let app = app::ConsoleApp::new();
-        app.run().await?;
+        app.run(args.auto_app).await?;
     }
 
     Ok(())
